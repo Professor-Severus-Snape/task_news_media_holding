@@ -64,7 +64,7 @@ const App = () => {
                   marginBottom: isLast ? 0 : 20,
                 }}
               >
-                <Card title={item.title}>
+                <Card title={item.title} style={{ width: '100%' }}>
                   <p
                     style={{
                       marginBottom: 10,
