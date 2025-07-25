@@ -1,3 +1,5 @@
+![CI](https://github.com/professor-severus-snape/task_news_media_holding/actions/workflows/web.yml/badge.svg)
+
 # Тестовое задание для компании «News Media Holding»
 
 **Требования:**
