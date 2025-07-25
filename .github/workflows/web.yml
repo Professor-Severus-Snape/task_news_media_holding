@@ -1,5 +1,5 @@
 # название workflow:
-name: deploy via GitHub Pages
+name: deployment
 
 # запуск workflow:
 on:
