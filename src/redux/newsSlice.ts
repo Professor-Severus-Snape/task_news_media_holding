@@ -1,4 +1,5 @@
 import { buildCreateSlice, asyncThunkCreator } from '@reduxjs/toolkit';
+import { API_URL } from '../config';
 import type { INewsItem } from '../models/models';
 
 interface IInitialState {
@@ -24,11 +25,9 @@ const newsSlice = createSliceWithThunk({
     fetchNews: creators.asyncThunk<INewsItem[], number>(
       async (skipValue, { rejectWithValue }) => {
         try {
-          const baseUrl = import.meta.env.VITE_BASE_URL;
           const route = '/posts';
           const queryParams = `?limit=10&skip=${skipValue}`;
-
-          const request = baseUrl + route + queryParams;
+          const request = API_URL + route + queryParams;
           const response = await fetch(request);
 
           if (!response.ok) {
