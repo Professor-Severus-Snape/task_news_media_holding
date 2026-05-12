@@ -1,27 +1,45 @@
-![CI](https://github.com/professor-severus-snape/task_news_media_holding/actions/workflows/web.yml/badge.svg)
+[![CI/CD](https://github.com/professor-severus-snape/task_news_media_holding/actions/workflows/web.yml/badge.svg)](https://github.com/professor-severus-snape/task_news_media_holding/actions/workflows/web.yml)
 
-# Тестовое задание для компании «News Media Holding»
+# Задание для компании «News Media Holding»
 
-**Требования:**
+Приложение для отображения новостной ленты с бесконечной подгрузкой данных.
 
-- Создать приложение для отображения ленты новостей.
-- При открытии страницы должны загружаться новости, с удалённого сервера.
-- Отображение по 10 новостей. После скролла к последней новости, должны подгрузиться следующие 10
-  новостей и т.д.
-- Дизайн в приложении - в свободной форме.
-- На карточке новости должно быть отображено:
-  - Название (title)
-  - Текст (body) (не более трёх строк)
-  - Теги
-  - Количество реакций
-- Должны быть использованы:
-  - React
-  - Redux Toolkit
-  - Ant Design
-- Api для получения постов: `https://dummyjson.com/posts?limit=10&skip=0`
+Новости загружаются с удалённого API и отображаются порциями по 10 карточек при прокрутке страницы.
 
-**Реализация:**
+![Preview image](./docs/preview.png)
 
-1. Проект реализован на React + typescript.
-1. В процессе работы над проектом впервые была использована библиотека Ant Design.
-1. Также это был мой первый опыт работы с API браузера IntersectionObserver.
+## Демо
+
+Посмотреть демо можно [здесь](https://professor-severus-snape.github.io/task_news_media_holding/).
+
+## Возможности
+
+- загрузка новостей с удалённого сервера
+- бесконечный скролл через Intersection Observer API
+- отображение заголовка, текста (не более трёх строк), тегов и количества реакций
+- автоматическая подгрузка новых данных при прокрутке
+- индикация загрузки данных
+
+## Технологии
+
+- React
+- глобальный стейт менеджер — Redux Toolkit
+- UI-библиотека — Ant Design
+- работа с API — Fetch API
+- бесконечный скролл — Intersection Observer API
+- типизация — TypeScript
+- линтинг — ESLint
+- сборка — Vite
+
+## API
+
+Для получения данных используется:
+
+```bash
+https://dummyjson.com/posts?limit=10&skip=0
+```
+
+## CI/CD
+
+- GitHub Actions — линтинг и сборка проекта (CI)
+- GitHub Pages — автоматический деплой приложения (CD)
