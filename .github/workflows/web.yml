@@ -1,80 +1,102 @@
-# название workflow:
-name: deployment
+# название workflow (имя даём сами):
+name: CI/CD
 
-# запуск workflow:
+# способы запуска workflow:
 on:
-  # при каждом пуше в репозиторий:
+  # 1. при каждом пуше в ветку 'main'
   push:
-
-  # запуск вручную из вкладки Actions на GitHub:
+    branches:
+      - main
+    paths-ignore:
+      - "**/*.md"
+      - "LICENSE"
+  # 2. разрешаем также ручной запуск из вкладки Actions на GitHub
   workflow_dispatch:
 
 # настройка разрешений для токена GITHUB_TOKEN для деплоя на GitHub Pages:
 permissions:
-  # разрешить чтение содержимого:
-  contents: read
-  # разрешить запись на GitHub Pages:
-  pages: write
-  # разрешить использование токена идентификации:
-  id-token: write
+  contents: read # разрешить чтение содержимого
+  pages: write # разрешить запись на GitHub Pages
+  id-token: write # разрешить использование токена идентификации (для Pages)
 
-# конкурентность:
+# ограничение параллельных запусков workflow
 concurrency:
-  # ограничивает выполнение одного workflow в группе 'pages' одновременно:
-  group: 'pages'
-  # не отменяет текущие запуски, что позволяет завершить уже запущенные развертывания:
-  cancel-in-progress: false
+  group: "vite-pages" # группа workflow для деплоя (имя даём сами)
+  cancel-in-progress: true # отменяем старые, оставляем только последний запуск (актуальный деплой)
 
 # описание работ:
 jobs:
-  eslint:
-    # работа будет выполнена на последней версии Ubuntu:
-    runs-on: ubuntu-latest
+  # Job-1 - проверка кода линтером:
+  lint:
+    runs-on: ubuntu-latest # работа будет выполнена на последней версии Ubuntu
 
-    # шаги выполнения работы:
-    steps:
-      # клонирование репозитория:
-      - uses: actions/checkout@v4
-      # установка Node.js версии 20.13.1 и настраивание кеширования для npm:
-      - uses: actions/setup-node@v4
+    steps: # шаги выполнения работы:
+      # 1. клонирование репозитория
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. установка Node.js и кеширование npm
+      - name: Setup Node.js and enable npm cache
+        uses: actions/setup-node@v4
         with:
-          node-version: 20.13.1
-          cache: 'npm'
-      # установка зависимостей проекта:
-      - run: npm install
-      # запуск линтера для проверки кода на соответствие стандартам:
-      - run: npm run lint
+          node-version: 22
+          cache: npm
 
+      # 3. установка зависимостей
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. запуск линтера
+      - name: Run ESLint
+        run: npm run lint
+
+  # Job-2 - сборка и деплой на GitHub Pages:
   build:
-    # сборка осуществляется только после успешного завершения работы eslint:
-    needs: [eslint]
+    # выполняется только после успешных работы 'lint'
+    needs:
+      - lint
 
-    # настройки окружения для развертывания на GitHub Pages:
-    environment:
-      # имя окружения:
-      name: github-pages
-      # URL для развертывания, используется вывод из шага deployment:
-      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest # работа будет выполнена на последней версии Ubuntu
 
-    runs-on: ubuntu-latest
+    environment: # настройки окружения для развёртывания на GitHub Pages
+      name: github-pages # имя окружения
+      url: ${{ steps.deployment.outputs.page_url }} # URL для деплоя (вывод из шага deployment)
 
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+    steps: # шаги выполнения работы
+      # 1. клонирование репозитория
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. установка Node.js и кеширование npm
+      - name: Setup Node.js and enable npm cache
+        uses: actions/setup-node@v4
         with:
-          node-version: 20.13.1
-          cache: 'npm'
-      - run: npm install
-      - run: npm run build
-      # настройка для GitHub Pages:
-      - name: Setup Pages
+          node-version: 22
+          cache: npm
+
+      # 3. установка зависимостей
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. очистка старых артефактов Pages (по необходимости)
+      - name: Clean old build artifacts
+        run: rm -rf ./dist || echo "No dist folder to clean"
+
+      # 5. сборка проекта
+      - name: Build project
+        run: npm run build
+
+      # 6. настройка Pages и environment:
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v4
-      # загрузка артефактов сборки (каталог dist):
-      - name: Upload artifact
+
+      # 7. загрузка новых артефактов (dist) для деплоя:
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'dist'
-      # развертывание на GitHub Pages:
+          path: dist # указываем директорию с готовой сборкой
+
+      # 8. деплой на GitHub Pages:
       - name: Deploy to GitHub Pages
-        id: deployment
+        id: deployment # deployment позволяет получить URL страницы через outputs
         uses: actions/deploy-pages@v4
